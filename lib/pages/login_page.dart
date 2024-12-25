@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:swifty_companion/services/oauth_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert';
 
 class LoginPage extends StatelessWidget {
-  final OAuthService _authService = OAuthService(); // Instance of OAuthService
+  final OAuthService authService;
+
+  LoginPage({required this.authService});
 
   @override
   Widget build(BuildContext context) {
@@ -22,21 +26,28 @@ class LoginPage extends StatelessWidget {
             ElevatedButton(
               onPressed: () async {
                 try {
-                  // Perform OAuth login
-                  final token = await _authService.performOAuthLogin();
+                  // Perform OAuth login and get the token
+                  final token = await authService.performOAuthLogin();
 
                   if (token != null) {
-                    // Fetch user details using the access token
+                    // Save the token
+                    final prefs = await SharedPreferences.getInstance();
+                    await prefs.setString('accessToken', token);
+
+                    // Fetch user details and save them
                     final userDetails =
-                        await _authService.fetchUserDetails(token);
-                    print(userDetails);
-                    // Navigate to the profile page with user details
+                        await authService.fetchUserDetails(token);
+                    await prefs.setString(
+                        'userDetails', jsonEncode(userDetails));
+
+                    // Navigate to profile page
                     Navigator.pushReplacementNamed(
                       context,
                       '/profile',
                       arguments: userDetails,
                     );
                   } else {
+                    // Show login failed message
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(content: Text('Login failed')),
                     );
