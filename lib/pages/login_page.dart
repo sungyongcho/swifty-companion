@@ -29,16 +29,12 @@ class LoginPage extends StatelessWidget {
                     // Fetch user details using the access token
                     final userDetails =
                         await _authService.fetchUserDetails(token);
-
+                    print(userDetails);
                     // Navigate to the profile page with user details
                     Navigator.pushReplacementNamed(
                       context,
                       '/profile',
-                      arguments: {
-                        'username': userDetails['username'],
-                        'first_name': userDetails['first_name'],
-                        'last_name': userDetails['last_name'],
-                      },
+                      arguments: userDetails,
                     );
                   } else {
                     ScaffoldMessenger.of(context).showSnackBar(
