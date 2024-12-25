@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:swifty_companion/services/oauth_service.dart';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:swifty_companion/widgets/profile_tab.dart';
 
 class ProfilePage extends StatefulWidget {
   final OAuthService authService;
@@ -14,6 +15,7 @@ class ProfilePage extends StatefulWidget {
 
 class _ProfilePageState extends State<ProfilePage> {
   Map<String, dynamic>? userDetails;
+  int _currentIndex = 0;
 
   @override
   void initState() {
@@ -42,41 +44,74 @@ class _ProfilePageState extends State<ProfilePage> {
       );
     }
 
+    final List<Widget> _pages = [
+      ProfileTab(userDetails: userDetails!), // First tab: Profile content
+      const Center(
+        child: Text(
+          'Skills',
+          style: TextStyle(fontSize: 24),
+        ),
+      ), // Second tab: Skills placeholder
+      const Center(
+        child: Text(
+          'Projects',
+          style: TextStyle(fontSize: 24),
+        ),
+      ), // Third tab: Projects placeholder
+    ];
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Profile'),
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            CircleAvatar(
-              radius: 50,
-              backgroundImage: NetworkImage(userDetails!['image']?['link']),
-              backgroundColor: Colors.grey[200],
-            ),
-            const SizedBox(height: 20),
-            Text(
-              'Username: ${userDetails!['login']}',
-              style: const TextStyle(fontSize: 18),
-            ),
-            Text(
-              'First Name: ${userDetails!['first_name']}',
-              style: const TextStyle(fontSize: 18),
-            ),
-            Text(
-              'Last Name: ${userDetails!['last_name']}',
-              style: const TextStyle(fontSize: 18),
-            ),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () {
-                _logout(context);
-              },
-              child: const Text('Logout'),
-            ),
-          ],
+        leading: IconButton(
+          icon: Icon(Icons.logout), // Logout icon
+          onPressed: () {
+            // Show a confirmation dialog before logging out
+            showDialog(
+              context: context,
+              builder: (context) => AlertDialog(
+                title: const Text('Logout'),
+                content: const Text('Are you sure you want to logout?'),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(context), // Cancel action
+                    child: const Text('Cancel'),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      Navigator.pop(context); // Close the dialog
+                      _logout(context); // Call logout
+                    },
+                    child: const Text('Logout'),
+                  ),
+                ],
+              ),
+            );
+          },
         ),
+      ),
+      body: _pages[_currentIndex],
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _currentIndex,
+        onTap: (index) {
+          setState(() {
+            _currentIndex = index;
+          });
+        },
+        items: const [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.person), // Profile icon
+            label: 'Profile',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.bar_chart), // Skills icon
+            label: 'Skills',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.folder), // Projects icon
+            label: 'Projects',
+          ),
+        ],
       ),
     );
   }
@@ -87,6 +122,6 @@ class _ProfilePageState extends State<ProfilePage> {
 
     widget.authService.clearToken(); // Clear token from the auth service
 
-    Navigator.pushReplacementNamed(context, '/');
+    Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
   }
 }
