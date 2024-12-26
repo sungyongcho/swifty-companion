@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_appauth/flutter_appauth.dart';
 import 'package:http/http.dart' as http;
@@ -98,6 +99,41 @@ class OAuthService {
     } catch (e) {
       print('Error fetching user details: $e');
       throw Exception('Error fetching user details: $e');
+    }
+  }
+
+  Future<List<dynamic>> fetchUserSkills(String accessToken, int userId) async {
+    final String userSkillsEndpoint =
+        'https://api.intra.42.fr/v2/users/$userId';
+
+    try {
+      final response = await http.get(
+        Uri.parse(userSkillsEndpoint),
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> data =
+            json.decode(response.body) as Map<String, dynamic>;
+        final List<dynamic> cursusUsers = data['cursus_users'] as List<dynamic>;
+        final matchingCursus = cursusUsers.firstWhere(
+          (cursus) => cursus['cursus_id'] == 21,
+          orElse: () => null, // Handle case where no match is found
+        );
+        print(matchingCursus['skills']);
+        return matchingCursus['skills']
+            as List<dynamic>; // Extract and return the skills list
+      } else if (response.statusCode == 401) {
+        // Token might be invalid or expired
+        throw Exception('Unauthorized: Token may have expired.');
+      } else {
+        throw Exception('Failed to fetch user skills: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Error fetching user skills: $e');
+      throw Exception('Error fetching user skills: $e');
     }
   }
 }

@@ -18,15 +18,23 @@ class ProfileTab extends StatelessWidget {
           ),
           const SizedBox(height: 20),
           Text(
-            'Username: ${userDetails['login']}',
+            'Login: ${userDetails['login']}',
             style: const TextStyle(fontSize: 18),
           ),
           Text(
-            'First Name: ${userDetails['first_name']}',
+            'Name: ${userDetails['usual_full_name']}',
             style: const TextStyle(fontSize: 18),
           ),
           Text(
-            'Last Name: ${userDetails['last_name']}',
+            'Wallet: ${userDetails['wallet']}',
+            style: const TextStyle(fontSize: 18),
+          ),
+          Text(
+            'Evaluation Points: ${userDetails['correction_point']}',
+            style: const TextStyle(fontSize: 18),
+          ),
+          Text(
+            'Email: ${userDetails['email']}',
             style: const TextStyle(fontSize: 18),
           ),
           const SizedBox(height: 20),

@@ -3,6 +3,7 @@ import 'package:swifty_companion/services/oauth_service.dart';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:swifty_companion/widgets/profile_tab.dart';
+import 'package:swifty_companion/widgets/skills_tab.dart';
 
 class ProfilePage extends StatefulWidget {
   final OAuthService authService;
@@ -26,6 +27,7 @@ class _ProfilePageState extends State<ProfilePage> {
   Future<void> _loadUserDetails() async {
     final prefs = await SharedPreferences.getInstance();
     final userDetailsString = prefs.getString('userDetails');
+    // print(userDetailsString);
     if (userDetailsString != null) {
       setState(() {
         userDetails = jsonDecode(userDetailsString);
@@ -46,12 +48,13 @@ class _ProfilePageState extends State<ProfilePage> {
 
     final List<Widget> _pages = [
       ProfileTab(userDetails: userDetails!), // First tab: Profile content
-      const Center(
-        child: Text(
-          'Skills',
-          style: TextStyle(fontSize: 24),
-        ),
-      ), // Second tab: Skills placeholder
+      SkillsTab(),
+      // const Center(
+      //   child: Text(
+      //     'Skills',
+      //     style: TextStyle(fontSize: 24),
+      //   ),
+      // ), // Second tab: Skills placeholder
       const Center(
         child: Text(
           'Projects',
