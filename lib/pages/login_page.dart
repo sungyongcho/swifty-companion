@@ -42,10 +42,6 @@ class LoginPage extends StatelessWidget {
                     final userSkills = await authService.fetchUserSkills(
                         token, userDetails['id']);
                     await prefs.setString('userSkills', jsonEncode(userSkills));
-                    final userProjects = await authService.fetchUserProjects(
-                        token, userDetails['id']);
-                    await prefs.setString(
-                        'userProjects', jsonEncode(userProjects));
                     // Navigate to profile page
                     Navigator.pushReplacementNamed(
                       context,

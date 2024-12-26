@@ -1,44 +1,95 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:swifty_companion/services/oauth_service.dart';
 
 class ProjectsTab extends StatefulWidget {
+  final int userId;
+
+  ProjectsTab({required this.userId});
+
   @override
   _ProjectsTabState createState() => _ProjectsTabState();
 }
 
 class _ProjectsTabState extends State<ProjectsTab> {
-  List<dynamic>? projects;
+  final OAuthService _oauthService = OAuthService();
+  List<dynamic> projects = [];
+  int currentPage = 1;
+  bool isLoading = false;
+  bool hasMore = true;
+  final ScrollController _scrollController = ScrollController();
 
   @override
   void initState() {
     super.initState();
-    _loadUserProjects();
+    _fetchProjects();
+    _scrollController.addListener(_onScroll);
   }
 
-  Future<void> _loadUserProjects() async {
-    final prefs = await SharedPreferences.getInstance();
-    final projectsString = prefs.getString('userProjects');
-    if (projectsString != null) {
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _fetchProjects() async {
+    if (isLoading || !hasMore) return;
+
+    setState(() {
+      isLoading = true;
+    });
+
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final accessToken = prefs.getString('access_token');
+
+      if (accessToken == null) {
+        throw Exception('Access token not found. Please log in again.');
+      }
+
+      final newProjects = await _oauthService.fetchUserProjects(
+        accessToken,
+        widget.userId,
+        currentPage,
+      );
+
       setState(() {
-        projects = jsonDecode(projectsString);
+        projects.addAll(newProjects);
+        currentPage++;
+        if (newProjects.isEmpty || newProjects.length < 30) {
+          hasMore = false; // No more data to fetch
+        }
       });
+    } catch (e) {
+      print('Error fetching projects: $e');
+    } finally {
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
+
+  void _onScroll() {
+    if (_scrollController.position.pixels >=
+        _scrollController.position.maxScrollExtent - 200) {
+      _fetchProjects();
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    if (projects == null) {
-      return const Center(
-        child: CircularProgressIndicator(),
-      );
-    }
-
     return ListView.builder(
+      controller: _scrollController,
       padding: const EdgeInsets.all(16.0),
-      itemCount: projects!.length,
+      itemCount: projects.length + (isLoading ? 1 : 0),
       itemBuilder: (context, index) {
-        final project = projects![index];
+        if (index == projects.length) {
+          return const Center(
+            child: CircularProgressIndicator(),
+          );
+        }
+
+        final project = projects[index];
 
         return Card(
           margin: const EdgeInsets.symmetric(vertical: 8.0),

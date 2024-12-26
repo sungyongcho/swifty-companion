@@ -137,13 +137,12 @@ class OAuthService {
   }
 
   Future<List<dynamic>> fetchUserProjects(
-      String accessToken, int userId) async {
-    final String userSkillsEndpoint =
-        'https://api.intra.42.fr/v2/users/$userId/projects_users';
-
+      String accessToken, int userId, int page) async {
+    final String endpoint =
+        'https://api.intra.42.fr/v2/users/$userId/projects_users?filter[status]=finished&page[number]=$page&page[size]=30';
     try {
       final response = await http.get(
-        Uri.parse(userSkillsEndpoint),
+        Uri.parse(endpoint),
         headers: {
           'Authorization': 'Bearer $accessToken',
         },
@@ -151,17 +150,16 @@ class OAuthService {
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
-        print(data);
-        return data; // Extract and return the skills list
+        return data;
       } else if (response.statusCode == 401) {
-        // Token might be invalid or expired
         throw Exception('Unauthorized: Token may have expired.');
       } else {
-        throw Exception('Failed to fetch user skills: ${response.statusCode}');
+        throw Exception(
+            'Failed to fetch user projects: ${response.statusCode}');
       }
     } catch (e) {
-      print('Error fetching user skills: $e');
-      throw Exception('Error fetching user skills: $e');
+      print('Error fetching user projects: $e');
+      throw Exception('Error fetching user projects: $e');
     }
   }
 }

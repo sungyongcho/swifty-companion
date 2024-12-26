@@ -28,7 +28,6 @@ class _ProfilePageState extends State<ProfilePage> {
   Future<void> _loadUserDetails() async {
     final prefs = await SharedPreferences.getInstance();
     final userDetailsString = prefs.getString('userDetails');
-    // print(userDetailsString);
     if (userDetailsString != null) {
       setState(() {
         userDetails = jsonDecode(userDetailsString);
@@ -49,27 +48,17 @@ class _ProfilePageState extends State<ProfilePage> {
 
     final List<Widget> _pages = [
       ProfileTab(userDetails: userDetails!), // First tab: Profile content
-      SkillsTab(),
-      // const Center(
-      //   child: Text(
-      //     'Skills',
-      //     style: TextStyle(fontSize: 24),
-      //   ),
-      // ), // Second tab: Skills placeholder
-      ProjectsTab(),
-      const Center(
-        child: Text(
-          'Projects',
-          style: TextStyle(fontSize: 24),
-        ),
-      ), // Third tab: Projects placeholder
+      SkillsTab(), // Second tab: Skills placeholder
+      ProjectsTab(
+        userId: userDetails?['id'] ?? 0, // Fix: Safely handle `id` extraction
+      ),
     ];
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('Profile'),
         leading: IconButton(
-          icon: Icon(Icons.logout), // Logout icon
+          icon: const Icon(Icons.logout), // Logout icon
           onPressed: () {
             // Show a confirmation dialog before logging out
             showDialog(
