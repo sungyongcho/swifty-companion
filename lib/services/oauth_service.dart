@@ -122,9 +122,37 @@ class OAuthService {
           (cursus) => cursus['cursus_id'] == 21,
           orElse: () => null, // Handle case where no match is found
         );
-        print(matchingCursus['skills']);
         return matchingCursus['skills']
             as List<dynamic>; // Extract and return the skills list
+      } else if (response.statusCode == 401) {
+        // Token might be invalid or expired
+        throw Exception('Unauthorized: Token may have expired.');
+      } else {
+        throw Exception('Failed to fetch user skills: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Error fetching user skills: $e');
+      throw Exception('Error fetching user skills: $e');
+    }
+  }
+
+  Future<List<dynamic>> fetchUserProjects(
+      String accessToken, int userId) async {
+    final String userSkillsEndpoint =
+        'https://api.intra.42.fr/v2/users/$userId/projects_users';
+
+    try {
+      final response = await http.get(
+        Uri.parse(userSkillsEndpoint),
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        print(data);
+        return data; // Extract and return the skills list
       } else if (response.statusCode == 401) {
         // Token might be invalid or expired
         throw Exception('Unauthorized: Token may have expired.');

@@ -3,6 +3,7 @@ import 'package:swifty_companion/services/oauth_service.dart';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:swifty_companion/widgets/profile_tab.dart';
+import 'package:swifty_companion/widgets/projects_tab.dart';
 import 'package:swifty_companion/widgets/skills_tab.dart';
 
 class ProfilePage extends StatefulWidget {
@@ -55,6 +56,7 @@ class _ProfilePageState extends State<ProfilePage> {
       //     style: TextStyle(fontSize: 24),
       //   ),
       // ), // Second tab: Skills placeholder
+      ProjectsTab(),
       const Center(
         child: Text(
           'Projects',
